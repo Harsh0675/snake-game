@@ -1,134 +1,43 @@
-body {
-  background-color: darkslategrey;
-  text-align: center;
+* { box-sizing: border-box; }
+:root { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #e8f1ff; background: #050b14; }
+body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #14253d 0, #07111f 38%, #03070d 100%); display: grid; place-items: center; padding: 24px 12px; }
+button { font: inherit; }
+.app { width: min(720px, 100%); }
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.eyebrow { margin: 0 0 5px; font-size: 10px; letter-spacing: .2em; font-weight: 800; opacity: .6; }
+h1 { margin: 0; font-size: clamp(26px, 6vw, 40px); letter-spacing: -.04em; }
+h1 span { margin-left: 3px; }
+.iconButton { width: 44px; height: 44px; border: 1px solid #29415d; border-radius: 13px; background: #0d1928; color: #dffcff; cursor: pointer; font-weight: 900; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.stats div { padding: 10px 12px; border: 1px solid #20364d; border-radius: 13px; background: rgba(10, 22, 36, .88); }
+.stats span, .statusLine { font-size: 9px; letter-spacing: .15em; font-weight: 800; opacity: .55; }
+.stats strong { display: block; margin-top: 3px; font-size: 20px; }
+#gameContainer { width: min(88vw, 560px); aspect-ratio: 1; margin: 0 auto; padding: 5px; display: grid; grid-template-columns: repeat(20, 1fr); grid-template-rows: repeat(20, 1fr); gap: 1px; background: #0a1725; border: 1px solid #28425d; border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.45), inset 0 0 30px rgba(0,220,255,.04); overflow: hidden; touch-action: none; }
+.gameBoardPixel { min-width: 0; min-height: 0; border-radius: 2px; }
+.snakeBodyPixel { background: #48e6b0; box-shadow: 0 0 9px rgba(72,230,176,.55); }
+.snakeHead { background: #dffff6; box-shadow: 0 0 14px rgba(72,230,176,.9); border-radius: 4px; }
+.food { background: #ff5f87; border-radius: 50%; box-shadow: 0 0 15px rgba(255,95,135,.9); animation: pulse .65s infinite alternate; }
+.statusLine { width: min(88vw, 560px); margin: 9px auto 0; display: flex; justify-content: space-between; }
+#onScreenControllers { display: none; }
+.panel { width: min(88vw, 500px); margin: 16px auto 0; padding: 22px; text-align: center; border: 1px solid #28425d; border-radius: 20px; background: rgba(7, 17, 29, .96); box-shadow: 0 22px 55px rgba(0,0,0,.35); }
+.panel h2 { margin: 5px 0 10px; font-size: clamp(28px, 7vw, 42px); line-height: .95; letter-spacing: -.05em; }
+.panel em { font-style: normal; }
+.panel p:not(.eyebrow) { margin: 0 auto 17px; max-width: 420px; color: #9fb1c6; line-height: 1.5; font-size: 14px; }
+.primary { width: 100%; border: 0; border-radius: 13px; padding: 13px 16px; background: #48e6b0; color: #03100c; font-weight: 900; letter-spacing: .06em; cursor: pointer; }
+.primary span { float: right; }
+.hidden { display: none !important; }
+.result { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #20364d; }
+.result span { font-size: 10px; opacity: .55; letter-spacing: .14em; }
+.result strong { font-size: 20px; }
+footer { text-align: center; margin: 18px 0 4px; font-size: 11px; color: #6f8298; }
+footer a { color: #9cebd6; text-decoration: none; }
+@keyframes pulse { from { transform: scale(.72); opacity: .7; } to { transform: scale(1); opacity: 1; } }
+@media (max-width: 700px) {
+  body { padding: 14px 10px 22px; }
+  #onScreenControllers { width: min(88vw, 560px); margin: 10px auto 0; display: flex; align-items: center; justify-content: space-between; }
+  #onScreenControllers > div { display: flex; flex-direction: column; }
+  #onScreenControllers button { width: 68px; height: 52px; margin: 2px; border: 1px solid #29415d; border-radius: 13px; background: #0d1928; color: #e8f1ff; font-size: 24px; font-weight: 800; touch-action: manipulation; }
+  #onScreenControllers button:active { transform: scale(.95); background: #173047; }
+  .panel { margin-top: 12px; }
 }
-
-/* GAME BOARD STYLES */
-#gameContainer {
-  /*
-	width and height of .gameBoardPixel should 1/40 of the width and height of #gameContainer,
-	because it is used in calculation in the jscript.js file
-	*/
-  width: 40vw;
-  height: 40vw;
-  margin: 2vw auto;
-  background-color: #0c1021;
-  border: solid 10px slategrey;
-  border-radius: 10px;
-
-  -webkit-box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.6);
-  -moz-box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.6);
-  box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.6);
-}
-
-.gameBoardPixel {
-  /* background-color: slategrey; */
-  /*
-	width and height of .gameBoardPixel should 1/40 of the width and height of #gameContainer,
-	because it is used in calculation in the jscript.js file
-	*/
-  width: 1vw;
-  height: 1vw;
-  border-radius: 10px;
-  float: left;
-}
-/* GAME BOARD STYLES END*/
-
-/* SNAKE STYLES */
-.snakeBodyPixel {
-  background-color: #6201fd;
-  box-shadow: 0 0 5px #fd6401;
-}
-/* SNAKE STYLES END*/
-
-/* FOOD STYLES */
-.food {
-  background-color: #68e768;
-}
-/* FOOD STYLES END*/
-
-/* SCORE STYLES */
-#scoreContainer {
-  width: 40vw;
-  display: flex;
-  margin: auto;
-  justify-content: space-around;
-}
-
-.scoreBoard {
-  border-radius: 10px;
-  border: solid 5px slategrey;
-  color: dimgray;
-  background-color: #0c1021;
-  display: inline-block;
-  padding: 1vw;
-  width: 40%;
-
-  -webkit-box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.6);
-  -moz-box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.6);
-  box-shadow: 0px 0px 20px 3px rgba(0, 0, 0, 0.6);
-}
-/* SCORE STYLES END */
-
-/* Hide #onScreenControllers on desktop */
-#onScreenControllers {
-  display: none;
-}
-
-.developerDetails {
-  margin-top: 2vw;
-  display: flex;
-  flex-direction: column;
-  color: #0c1021;
-  font-family: monospace;
-}
-
-.developerDetails a {
-  color: #0c1021;
-}
-
-@media only screen and (max-width: 768px) {
-  /* MOBILE */
-  #gameContainer {
-    width: 80vw;
-    height: 80vw;
-  }
-
-  .gameBoardPixel {
-    width: 2vw;
-    height: 2vw;
-  }
-
-  #scoreContainer {
-    width: 80vw;
-  }
-
-  #onScreenControllers {
-    width: 80vw;
-    margin: 5vw auto;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-  }
-
-  #onScreenControllers > div {
-    display: flex;
-    flex-direction: column;
-  }
-
-  #onScreenControllers button {
-    background-color: transparent;
-    height: 20vw;
-    width: 20vw;
-    font-size: 10vw;
-    border: none;
-  }
-
-  #onScreenControllers button:focus {
-    outline: none;
-  }
-
-  #onScreenControllers button:active {
-    background-color: slategray;
-  }
-}
+@media (prefers-reduced-motion: reduce) { .food { animation: none; } }
