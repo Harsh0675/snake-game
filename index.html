@@ -1,46 +1,53 @@
-<!DOCTYPE html>
-<html>
-  <head lang="en">
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Snake v8</title>
-    <!-- Link our styles from main.css -->
-    <link rel="stylesheet" type="text/css" href="main.css" />
-  </head>
-  <body>
-    <!-- #gameContainer is the main game board-->
-    <div id="gameContainer"></div>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="description" content="Snake Arcade — a responsive vanilla JavaScript snake game." />
+  <title>Snake Arcade</title>
+  <link rel="stylesheet" href="main.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div><p class="eyebrow">ARCADE // CLASSIC</p><h1>SNAKE<span>+</span></h1></div>
+      <button id="pauseButton" class="iconButton" aria-label="Pause game">Ⅱ</button>
+    </header>
 
-    <!-- #scoreContainer contains the scores  -->
-    <div id="scoreContainer">
-      <div class="scoreBoard">Food: <span id="pointsEarned">0</span></div>
-      <div class="scoreBoard">Blocks: <span id="blocksTravelled">0</span></div>
+    <section class="stats" aria-live="polite">
+      <div><span>FOOD</span><strong id="pointsEarned">0</strong></div>
+      <div><span>BEST</span><strong id="bestScore">0</strong></div>
+      <div><span>SPEED</span><strong id="speedLevel">1</strong></div>
+    </section>
+
+    <section id="gameContainer" aria-label="Snake game board"></section>
+
+    <div class="statusLine"><span id="gameStatus">READY</span><span id="blocksTravelled">0 BLOCKS</span></div>
+
+    <div id="onScreenControllers" aria-label="Game controls">
+      <button id="leftButton" aria-label="Move left">←</button>
+      <div><button id="upButton" aria-label="Move up">↑</button><button id="downButton" aria-label="Move down">↓</button></div>
+      <button id="rightButton" aria-label="Move right">→</button>
     </div>
 
-    <!-- #onScreenControllers contains the navigation buttons for mobile screens -->
-    <div id="onScreenControllers">
-      <button id="leftButton">◀️</button>
-      <div>
-        <button id="upButton">🔼</button>
-        <button id="downButton">🔽</button>
-      </div>
-      <button id="rightButton">▶️</button>
-    </div>
+    <section id="startPanel" class="panel">
+      <p class="eyebrow">READY PLAYER</p>
+      <h2>Grow. Survive.<br><em>Beat your best.</em></h2>
+      <p>Use the arrow keys, WASD, or the touch controls. The snake wraps around the edges.</p>
+      <button id="startButton" class="primary">START GAME <span>▶</span></button>
+    </section>
 
-    <div class="developerDetails">
-      <div>
-        Developed by
-        <a href="https://rabiroshan.com/" target="_blank">Harsh Nagar.</a>
-      </div>
-      <div>
-        View source code on
-        <a href="https://github.com/RabiRoshan/snake_game" target="_blank"
-          >GitHub.</a
-        >
-      </div>
-    </div>
-  </body>
+    <section id="gameOverPanel" class="panel hidden">
+      <p class="eyebrow">RUN COMPLETE</p>
+      <h2>GAME<br><em>OVER</em></h2>
+      <div class="result"><span>SCORE</span><strong id="finalScore">0</strong></div>
+      <div class="result"><span>BEST</span><strong id="finalBest">0</strong></div>
+      <button id="restartButton" class="primary">PLAY AGAIN <span>↻</span></button>
+    </section>
 
-  <!-- #Load our jscript.js containing the game logic -->
+    <footer>Built with HTML, CSS &amp; Vanilla JavaScript · <a href="https://github.com/Harsh0675/snake-game" target="_blank" rel="noreferrer">Source</a></footer>
+  </main>
   <script src="jscript.js"></script>
+</body>
 </html>
