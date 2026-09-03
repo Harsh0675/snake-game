@@ -1,174 +1,155 @@
-// GAME_PIXEL_COUNT is the pixels on horizontal or vertical axis of the game board (SQUARE).
-const GAME_PIXEL_COUNT = 40;
-const SQUARE_OF_GAME_PIXEL_COUNT = Math.pow(GAME_PIXEL_COUNT, 2);
+(() => {
+  'use strict';
 
-let totalFoodAte = 0;
-let totalDistanceTravelled = 0;
+  const SIZE = 20;
+  const gameContainer = document.getElementById('gameContainer');
+  const scoreEl = document.getElementById('pointsEarned');
+  const bestEl = document.getElementById('bestScore');
+  const speedEl = document.getElementById('speedLevel');
+  const distanceEl = document.getElementById('blocksTravelled');
+  const statusEl = document.getElementById('gameStatus');
+  const startPanel = document.getElementById('startPanel');
+  const gameOverPanel = document.getElementById('gameOverPanel');
+  const finalScoreEl = document.getElementById('finalScore');
+  const finalBestEl = document.getElementById('finalBest');
+  const pauseButton = document.getElementById('pauseButton');
 
-/// THE GAME BOARD:
-const gameContainer = document.getElementById("gameContainer");
-
-const createGameBoardPixels = () => {
-  let gamePixelDivs = '';
-  for (let i = 1; i <= SQUARE_OF_GAME_PIXEL_COUNT; ++i) {
-    gamePixelDivs = `${gamePixelDivs} <div class="gameBoardPixel" id="pixel${i}"></div>`;
-  }
-  // Populate the [#gameContainer] div with small div's representing game pixels
-  gameContainer.innerHTML = `${gameContainer.innerHTML} ${gamePixelDivs}`;
-};
-
-// This variable always holds the updated array of game pixels created by createGameBoardPixels() :
-const gameBoardPixels = document.getElementsByClassName("gameBoardPixel");
-
-/// THE FOOD:
-let currentFoodPostion = 0;
-const createFood = () => {
-  // Remove previous food;
-  gameBoardPixels[currentFoodPostion].classList.remove("food");
-
-  // Create new food
-  currentFoodPostion = Math.random();
-  currentFoodPostion = Math.floor(
-    currentFoodPostion * SQUARE_OF_GAME_PIXEL_COUNT
-  );
-  gameBoardPixels[currentFoodPostion].classList.add("food");
-};
-
-/// THE SNAKE:
-
-// Direction codes (Keyboard key codes for arrow keys):
-const LEFT_DIR = 37;
-const UP_DIR = 38;
-const RIGHT_DIR = 39;
-const DOWN_DIR = 40;
-
-// Set snake direction initially to right
-let snakeCurrentDirection = RIGHT_DIR;
-
-const changeDirection = (newDirectionCode) => {
-  // Change the direction of the snake
-  if (newDirectionCode == snakeCurrentDirection) return;
-
-  if (newDirectionCode == LEFT_DIR && snakeCurrentDirection != RIGHT_DIR) {
-    snakeCurrentDirection = newDirectionCode;
-  } else if (newDirectionCode == UP_DIR && snakeCurrentDirection != DOWN_DIR) {
-    snakeCurrentDirection = newDirectionCode;
-  } else if (
-    newDirectionCode == RIGHT_DIR &&
-    snakeCurrentDirection != LEFT_DIR
-  ) {
-    snakeCurrentDirection = newDirectionCode;
-  } else if (newDirectionCode == DOWN_DIR && snakeCurrentDirection != UP_DIR) {
-    snakeCurrentDirection = newDirectionCode;
-  }
-};
-
-// Let the starting position of the snake be at the middle of game board
-let currentSnakeHeadPosition = SQUARE_OF_GAME_PIXEL_COUNT / 2;
-
-// Initial snake length
-let snakeLength = 1000;
-
-// Move snake continously by calling this function repeatedly :
-const moveSnake = () => {
-  switch (snakeCurrentDirection) {
-    case LEFT_DIR:
-      --currentSnakeHeadPosition;
-      const isSnakeHeadAtLastGameBoardPixelTowardsLeft =
-        currentSnakeHeadPosition % GAME_PIXEL_COUNT == GAME_PIXEL_COUNT - 1 ||
-        currentSnakeHeadPosition < 0;
-      if (isSnakeHeadAtLastGameBoardPixelTowardsLeft) {
-        currentSnakeHeadPosition = currentSnakeHeadPosition + GAME_PIXEL_COUNT;
-      }
-      break;
-    case UP_DIR:
-      currentSnakeHeadPosition = currentSnakeHeadPosition - GAME_PIXEL_COUNT;
-      const isSnakeHeadAtLastGameBoardPixelTowardsUp =
-        currentSnakeHeadPosition < 0;
-      if (isSnakeHeadAtLastGameBoardPixelTowardsUp) {
-        currentSnakeHeadPosition =
-          currentSnakeHeadPosition + SQUARE_OF_GAME_PIXEL_COUNT;
-      }
-      break;
-    case RIGHT_DIR:
-      ++currentSnakeHeadPosition;
-      const isSnakeHeadAtLastGameBoardPixelTowardsRight =
-        currentSnakeHeadPosition % GAME_PIXEL_COUNT == 0;
-      if (isSnakeHeadAtLastGameBoardPixelTowardsRight) {
-        currentSnakeHeadPosition = currentSnakeHeadPosition - GAME_PIXEL_COUNT;
-      }
-      break;
-    case DOWN_DIR:
-      currentSnakeHeadPosition = currentSnakeHeadPosition + GAME_PIXEL_COUNT;
-      const isSnakeHeadAtLastGameBoardPixelTowardsDown =
-        currentSnakeHeadPosition > SQUARE_OF_GAME_PIXEL_COUNT - 1;
-      if (isSnakeHeadAtLastGameBoardPixelTowardsDown) {
-        currentSnakeHeadPosition =
-          currentSnakeHeadPosition - SQUARE_OF_GAME_PIXEL_COUNT;
-      }
-      break;
-    default:
-      break;
+  const pixels = [];
+  for (let i = 0; i < SIZE * SIZE; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'gameBoardPixel';
+    gameContainer.appendChild(cell);
+    pixels.push(cell);
   }
 
-  let nextSnakeHeadPixel = gameBoardPixels[currentSnakeHeadPosition];
+  const dirs = {
+    ArrowLeft: [-1, 0], ArrowUp: [0, -1], ArrowRight: [1, 0], ArrowDown: [0, 1],
+    a: [-1, 0], w: [0, -1], d: [1, 0], s: [0, 1]
+  };
 
-  // Kill snake if it bites itself:
-  if (nextSnakeHeadPixel.classList.contains("snakeBodyPixel")) {
-    // Stop moving the snake
-    clearInterval(moveSnakeInterval);
-    if (
-      !alert(
-        `You have ate ${totalFoodAte} food by travelling ${totalDistanceTravelled} blocks.`
-      )
-    )
-      window.location.reload();
+  let snake, direction, queuedDirection, food, score, distance, timer, running = false, paused = false;
+  let best = Number(localStorage.getItem('snake-arcade-best') || 0);
+  bestEl.textContent = best;
+
+  const index = (x, y) => y * SIZE + x;
+  const same = (a, b) => a.x === b.x && a.y === b.y;
+  const speed = () => Math.min(180, 125 - Math.min(55, Math.floor(score / 5) * 5));
+
+  function randomFood() {
+    const free = [];
+    for (let y = 0; y < SIZE; y++) for (let x = 0; x < SIZE; x++) {
+      if (!snake.some(part => part.x === x && part.y === y)) free.push({ x, y });
+    }
+    return free[Math.floor(Math.random() * free.length)];
   }
 
-  nextSnakeHeadPixel.classList.add("snakeBodyPixel");
-
-  setTimeout(() => {
-    nextSnakeHeadPixel.classList.remove("snakeBodyPixel");
-  }, snakeLength);
-
-  // Update total distance travelled
-  totalDistanceTravelled++;
-  // Update in UI:
-  document.getElementById("blocksTravelled").innerHTML = totalDistanceTravelled;
-
-  if (currentSnakeHeadPosition == currentFoodPostion) {
-    // Update total food ate
-    totalFoodAte++;
-    // Update in UI:
-    document.getElementById("pointsEarned").innerHTML = totalFoodAte;
-
-    // Increase Snake length:
-    snakeLength = snakeLength + 100;
-    createFood();
+  function draw() {
+    pixels.forEach(p => p.className = 'gameBoardPixel');
+    snake.forEach((part, i) => pixels[index(part.x, part.y)].classList.add(i === 0 ? 'snakeHead' : 'snakeBodyPixel'));
+    if (food) pixels[index(food.x, food.y)].classList.add('food');
+    scoreEl.textContent = score;
+    bestEl.textContent = Math.max(best, score);
+    speedEl.textContent = Math.min(10, 1 + Math.floor(score / 5));
+    distanceEl.textContent = `${distance} BLOCKS`;
   }
-};
 
-/// CALL THE FOLLOWING FUNCTIONS TO RUN THE GAME:
+  function reset() {
+    clearTimeout(timer);
+    snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
+    direction = [1, 0];
+    queuedDirection = [1, 0];
+    food = randomFood();
+    score = 0;
+    distance = 0;
+    paused = false;
+    pauseButton.textContent = 'Ⅱ';
+    statusEl.textContent = 'RUNNING';
+    draw();
+  }
 
-// Create game board pixels:
-createGameBoardPixels();
+  function start() {
+    startPanel.classList.add('hidden');
+    gameOverPanel.classList.add('hidden');
+    reset();
+    running = true;
+    tick();
+  }
 
-// Create initial food:
-createFood();
+  function tick() {
+    if (!running || paused) return;
+    direction = queuedDirection;
+    const head = snake[0];
+    const next = { x: (head.x + direction[0] + SIZE) % SIZE, y: (head.y + direction[1] + SIZE) % SIZE };
+    const eating = same(next, food);
+    const bodyToCheck = eating ? snake : snake.slice(0, -1);
 
-// Move snake:
-var moveSnakeInterval = setInterval(moveSnake, 80);
+    if (bodyToCheck.some(part => same(part, next))) return endGame();
 
-// Call change direction function on keyboard key-down event:
-addEventListener("keydown", (e) => changeDirection(e.keyCode));
+    snake.unshift(next);
+    distance++;
+    if (eating) {
+      score++;
+      food = randomFood();
+      if (!food) return endGame(true);
+    } else {
+      snake.pop();
+    }
+    draw();
+    timer = setTimeout(tick, speed());
+  }
 
-// ON SCREEN CONTROLLERS:
-const leftButton = document.getElementById("leftButton");
-const rightButton = document.getElementById("rightButton");
-const upButton = document.getElementById("upButton");
-const downButton = document.getElementById("downButton");
+  function endGame(won = false) {
+    running = false;
+    clearTimeout(timer);
+    best = Math.max(best, score);
+    localStorage.setItem('snake-arcade-best', best);
+    statusEl.textContent = won ? 'BOARD CLEARED' : 'GAME OVER';
+    finalScoreEl.textContent = score;
+    finalBestEl.textContent = best;
+    gameOverPanel.classList.remove('hidden');
+    draw();
+  }
 
-leftButton.onclick = () => changeDirection(LEFT_DIR);
-rightButton.onclick = () => changeDirection(RIGHT_DIR);
-upButton.onclick = () => changeDirection(UP_DIR);
-downButton.onclick = () => changeDirection(DOWN_DIR);
+  function changeDirection(next) {
+    if (!running || paused) return;
+    if (next[0] === -direction[0] && next[1] === -direction[1]) return;
+    queuedDirection = next;
+  }
+
+  function togglePause() {
+    if (!running) return;
+    paused = !paused;
+    pauseButton.textContent = paused ? '▶' : 'Ⅱ';
+    statusEl.textContent = paused ? 'PAUSED' : 'RUNNING';
+    if (!paused) tick();
+  }
+
+  document.addEventListener('keydown', event => {
+    const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+    if (key === ' ' || key === 'p') { event.preventDefault(); togglePause(); return; }
+    if (dirs[key]) { event.preventDefault(); changeDirection(dirs[key]); }
+  });
+
+  const bind = (id, dir) => document.getElementById(id).addEventListener('pointerdown', e => { e.preventDefault(); changeDirection(dir); });
+  bind('leftButton', [-1, 0]); bind('upButton', [0, -1]); bind('rightButton', [1, 0]); bind('downButton', [0, 1]);
+  document.getElementById('startButton').onclick = start;
+  document.getElementById('restartButton').onclick = start;
+  pauseButton.onclick = togglePause;
+
+  let touchStart = null;
+  gameContainer.addEventListener('touchstart', e => {
+    const t = e.changedTouches[0];
+    touchStart = { x: t.clientX, y: t.clientY };
+  }, { passive: true });
+  gameContainer.addEventListener('touchend', e => {
+    if (!touchStart) return;
+    const t = e.changedTouches[0], dx = t.clientX - touchStart.x, dy = t.clientY - touchStart.y;
+    touchStart = null;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+    changeDirection(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? [1, 0] : [-1, 0]) : (dy > 0 ? [0, 1] : [0, -1]));
+  }, { passive: true });
+
+  reset();
+  running = false;
+  statusEl.textContent = 'READY';
+})();
