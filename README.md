@@ -1,66 +1,94 @@
 # 🐍 Snake Arcade
 
-A polished, responsive take on the classic Snake game built with **HTML, CSS, and vanilla JavaScript**. The game is designed for quick browser play on both desktop and mobile.
+A lightweight browser arcade game that reimagines the classic Snake experience with responsive controls, progressive difficulty, persistent scoring, and mobile-friendly interaction. It is intentionally built without frameworks or a build pipeline.
 
-## ✨ Features
+## 🎯 Gameplay
+
+The objective is simple: guide the snake toward food, grow the body, and survive as movement becomes faster. The board wraps at the edges, while running into the snake itself ends the round.
+
+### Features
 
 - Classic grid-based Snake gameplay
-- Edge wrapping for continuous movement
-- Food collection and growing snake
-- Progressive speed as your score increases
-- Persistent best score with `localStorage`
-- Game over and replay flow
-- Pause/resume support
-- Keyboard controls: Arrow keys + WASD
-- Mobile directional controls
-- Mobile swipe gestures
+- Edge wrapping
+- Food-driven snake growth
+- Progressive speed based on score
+- Persistent best score via `localStorage`
+- Pause/resume and replay flow
+- Arrow-key and WASD controls
+- On-screen mobile controls
+- Swipe input on touch devices
 - Responsive arcade-style interface
-- Lightweight — no framework or build step required
+- Zero framework and zero build dependency
 
 ## 🎮 Controls
 
-| Platform | Controls |
-| --- | --- |
-| Desktop | Arrow keys or WASD |
-| Mobile | On-screen arrows or swipe on the board |
-| Pause | `P` or `Space`, or the pause button |
+| Action | Desktop | Mobile |
+| --- | --- | --- |
+| Move | Arrow keys / WASD | Direction buttons / swipe |
+| Pause | `P` / `Space` | Pause button |
+| Restart | Replay control | Replay control |
 
-## 🧱 Stack
+## ⚙️ How it works
 
-- **HTML5** — semantic game shell and controls
-- **CSS3** — responsive layout, arcade UI, animations
-- **Vanilla JavaScript** — game state, movement, collision, scoring and persistence
-- **Web Storage API** — best-score persistence
+```text
+Input
+  ↓
+Direction update
+  ↓
+Next grid position
+  ↓
+Wrap + collision checks
+  ↓
+Food check
+  ↓
+Snake state update
+  ↓
+Render + schedule next tick
+```
+
+The game maintains the snake as coordinate-based state. Each update calculates the next head position, applies edge wrapping, validates self-collision, handles food consumption, updates the score, and schedules the next movement using the current difficulty.
+
+## 🧱 Technology
+
+- **HTML5** — game shell, HUD, controls, and overlays
+- **CSS3** — responsive layout, arcade styling, and interaction states
+- **Vanilla JavaScript** — game loop, state management, input, collision, scoring
+- **Web Storage API** — local best-score persistence
 
 ## ▶️ Run locally
 
-No installation is required.
+No package installation is required.
 
 ```bash
 git clone https://github.com/Harsh0675/snake-game.git
 cd snake-game
 ```
 
-Open `index.html` in a browser, or serve the folder with any static web server.
+Open `index.html` directly in a browser, or serve the directory with a static HTTP server.
 
-## 🗂️ Project structure
+## 📁 Project layout
 
 ```text
 snake-game/
-├── index.html      # Game shell, HUD, overlays and controls
-├── main.css        # Responsive visual system
-└── jscript.js      # Game engine and input handling
+├── index.html      # Game markup, HUD, overlays and controls
+├── main.css        # Responsive arcade interface
+├── jscript.js      # Game engine and input handling
+└── README.md       # Project documentation
 ```
-
-## 🧠 Implementation notes
-
-The game uses a compact coordinate-based state model rather than timing the snake body with DOM removal. Each tick calculates the next wrapped position, checks self-collision, grows only when food is collected, and schedules the next tick from the current difficulty level.
-
-Food is selected only from free cells, preventing impossible-to-reach spawns on the snake body. The best score is persisted locally so a browser refresh does not erase the player's record.
 
 ## 🌐 Deployment
 
-Because this is a static frontend, it can be hosted directly with **GitHub Pages** or any static hosting provider.
+Snake Arcade is a static web application, so it can be deployed to GitHub Pages or another static hosting service without a backend.
+
+For GitHub Pages, publish the repository's static files and use `index.html` as the site entry point.
+
+## 🔒 Browser data
+
+The game stores the player's best score locally using browser storage. No account or database is required for gameplay.
+
+## 💼 Portfolio focus
+
+This project demonstrates practical browser-game fundamentals: deterministic game state, real-time input handling, collision detection, responsive controls, difficulty scaling, persistence, and a framework-free frontend architecture.
 
 ## 📄 License
 
